@@ -306,7 +306,6 @@ export default function App() {
               <div className="control-card">
                 <div className="control-head">
                   <span>Anzahl Uebungen</span>
-                  <strong>{settings.exerciseCount}</strong>
                 </div>
                 <div className="stepper" role="group" aria-label="Anzahl Uebungen">
                   <button
@@ -333,7 +332,6 @@ export default function App() {
               <div className="control-card">
                 <div className="control-head">
                   <span>Arbeitszeit pro Uebung</span>
-                  <strong>{settings.workSeconds}s</strong>
                 </div>
                 <div className="stepper" role="group" aria-label="Arbeitszeit pro Uebung">
                   <button
@@ -360,7 +358,6 @@ export default function App() {
               <div className="control-card">
                 <div className="control-head">
                   <span>Pause zwischen Uebungen</span>
-                  <strong>{settings.restSeconds}s</strong>
                 </div>
                 <div className="stepper" role="group" aria-label="Pause zwischen Uebungen">
                   <button
@@ -387,7 +384,6 @@ export default function App() {
               <div className="control-card">
                 <div className="control-head">
                   <span>Runden</span>
-                  <strong>{settings.rounds}</strong>
                 </div>
                 <div className="stepper" role="group" aria-label="Runden">
                   <button
