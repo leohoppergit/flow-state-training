@@ -21,7 +21,7 @@
 
 html {
   background: #10131d;
-  overscroll-behavior: none;
+  overscroll-behavior-y: contain;
 }
 
 body {
@@ -33,7 +33,8 @@ body {
     radial-gradient(circle at top right, rgba(255, 138, 108, 0.16), transparent 34%),
     linear-gradient(180deg, #0d1018 0%, #121927 100%);
   color: var(--text);
-  overscroll-behavior: none;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -49,8 +50,8 @@ button {
 .app-shell {
   min-height: 100vh;
   position: relative;
-  overflow: hidden;
-  overscroll-behavior: none;
+  overflow-x: clip;
+  overscroll-behavior-y: contain;
 }
 
 .backdrop-grid {
