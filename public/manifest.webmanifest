@@ -1,0 +1,21 @@
+{
+  "name": "Flow State Training",
+  "short_name": "Flow Training",
+  "description": "Zeitbasierter Bodyweight- und Calisthenics-Workout-Generator.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "portrait",
+  "background_color": "#10131d",
+  "theme_color": "#10131d",
+  "categories": ["fitness", "health", "sports"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

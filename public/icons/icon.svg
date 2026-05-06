@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Flow State Training">
+  <rect width="512" height="512" rx="96" fill="#10131d"/>
+  <path d="M112 330c36 54 100 72 156 42 46-25 60-78 28-112-23-25-65-22-84 6-21 31 4 71 44 66 52-7 88-55 76-108-10-47-50-80-100-80-44 0-86 24-112 64" fill="none" stroke="#8ff0d8" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M354 162l46-44m-8 68l48-10" stroke="#ffbe6b" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="184" cy="230" r="22" fill="#ff8a6c"/>
+  <path d="M154 282h68m-42-35l-26 74m84-76l-38 76" stroke="#f3f5f8" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
