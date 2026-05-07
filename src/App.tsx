@@ -71,6 +71,7 @@ const copy = {
     skillLevel: "Skill-Level",
     trainingFocus: "Öfter trainieren",
     bodyweight: "Bodyweight",
+    exitConfirm: "App wirklich beenden?",
     generate: "Workout generieren",
     mixHint: "Die Auswahl mischt Fokus, Schwierigkeit und Bewegungsmuster automatisch.",
     generateError: "Workout konnte nicht generiert werden.",
@@ -159,6 +160,7 @@ const copy = {
     skillLevel: "Skill level",
     trainingFocus: "Train more often",
     bodyweight: "Bodyweight",
+    exitConfirm: "Really exit the app?",
     generate: "Generate workout",
     mixHint: "The generator balances focus, difficulty, and movement patterns instead of picking blindly.",
     generateError: "Workout could not be generated.",
@@ -407,6 +409,30 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    const exitGuardState = { flowStateExitGuard: true };
+
+    window.history.pushState(exitGuardState, "", window.location.href);
+
+    function handleBackNavigation() {
+      const shouldExit = window.confirm(t.exitConfirm);
+
+      if (shouldExit) {
+        window.removeEventListener("popstate", handleBackNavigation);
+        window.history.back();
+        return;
+      }
+
+      window.history.pushState(exitGuardState, "", window.location.href);
+    }
+
+    window.addEventListener("popstate", handleBackNavigation);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackNavigation);
+    };
+  }, [t.exitConfirm]);
 
   useEffect(() => {
     if (mode !== "session" || !isRunning || currentStep?.kind === "round-break") {

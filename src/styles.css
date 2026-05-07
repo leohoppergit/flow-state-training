@@ -20,7 +20,8 @@
 }
 
 html {
-  background: #10131d;
+  min-height: 100%;
+  background: #0d1018;
   overscroll-behavior-y: contain;
 }
 
@@ -28,6 +29,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
   background:
     radial-gradient(circle at top left, rgba(143, 240, 216, 0.16), transparent 28%),
     radial-gradient(circle at top right, rgba(255, 138, 108, 0.16), transparent 34%),
@@ -36,6 +38,11 @@ body {
   overflow-x: hidden;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 button,
@@ -49,9 +56,19 @@ button {
 
 .app-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   overflow-x: clip;
   overscroll-behavior-y: contain;
+  background:
+    radial-gradient(circle at top left, rgba(143, 240, 216, 0.16), transparent 28%),
+    radial-gradient(circle at top right, rgba(255, 138, 108, 0.16), transparent 34%),
+    linear-gradient(180deg, #0d1018 0%, #121927 100%);
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
 }
 
 .backdrop-grid {
