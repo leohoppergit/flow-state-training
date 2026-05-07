@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   buildSessionTimeline,
   calculateWorkoutTotals,
@@ -71,7 +71,10 @@ const copy = {
     skillLevel: "Skill-Level",
     trainingFocus: "Öfter trainieren",
     bodyweight: "Bodyweight",
-    exitConfirm: "App wirklich beenden?",
+    exitConfirmTitle: "App beenden?",
+    exitConfirmText: "Möchtest du Flow State Training wirklich schließen?",
+    exitConfirmYes: "Ja",
+    exitConfirmNo: "Nein",
     generate: "Workout generieren",
     mixHint: "Die Auswahl mischt Fokus, Schwierigkeit und Bewegungsmuster automatisch.",
     generateError: "Workout konnte nicht generiert werden.",
@@ -160,7 +163,10 @@ const copy = {
     skillLevel: "Skill level",
     trainingFocus: "Train more often",
     bodyweight: "Bodyweight",
-    exitConfirm: "Really exit the app?",
+    exitConfirmTitle: "Exit app?",
+    exitConfirmText: "Do you really want to close Flow State Training?",
+    exitConfirmYes: "Yes",
+    exitConfirmNo: "No",
     generate: "Generate workout",
     mixHint: "The generator balances focus, difficulty, and movement patterns instead of picking blindly.",
     generateError: "Workout could not be generated.",
@@ -359,10 +365,12 @@ function getStepSeconds(step: WorkoutStep | undefined) {
 
 export default function App() {
   const language = detectDeviceLanguage();
+  const exitConfirmedRef = useRef(false);
   const [hasEnteredGenerator, setHasEnteredGenerator] = useState(false);
   const [generatorTab, setGeneratorTab] = useState<GeneratorTab>("workout");
   const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>("all");
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
+  const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
   const [settings, setSettings] = useState<WorkoutSettings>(loadStoredSettings);
   const [exercisePreferences, setExercisePreferences] = useState<ExercisePreferences>(
     loadStoredExercisePreferences
@@ -413,18 +421,16 @@ export default function App() {
   useEffect(() => {
     const exitGuardState = { flowStateExitGuard: true };
 
-    window.history.pushState(exitGuardState, "", window.location.href);
+    if (!window.history.state?.flowStateExitGuard) {
+      window.history.pushState(exitGuardState, "", window.location.href);
+    }
 
     function handleBackNavigation() {
-      const shouldExit = window.confirm(t.exitConfirm);
-
-      if (shouldExit) {
-        window.removeEventListener("popstate", handleBackNavigation);
-        window.history.back();
+      if (exitConfirmedRef.current) {
         return;
       }
 
-      window.history.pushState(exitGuardState, "", window.location.href);
+      setIsExitDialogOpen(true);
     }
 
     window.addEventListener("popstate", handleBackNavigation);
@@ -432,7 +438,7 @@ export default function App() {
     return () => {
       window.removeEventListener("popstate", handleBackNavigation);
     };
-  }, [t.exitConfirm]);
+  }, []);
 
   useEffect(() => {
     if (mode !== "session" || !isRunning || currentStep?.kind === "round-break") {
@@ -592,6 +598,21 @@ export default function App() {
     setIsRunning(false);
     setHasEnteredGenerator(true);
     setMode("generator");
+  }
+
+  function handleCancelExit() {
+    setIsExitDialogOpen(false);
+    window.history.pushState({ flowStateExitGuard: true }, "", window.location.href);
+  }
+
+  function handleConfirmExit() {
+    exitConfirmedRef.current = true;
+    setIsExitDialogOpen(false);
+
+    window.setTimeout(() => {
+      window.history.go(-1);
+      window.setTimeout(() => window.close(), 120);
+    }, 0);
   }
 
   return (
@@ -1130,6 +1151,23 @@ export default function App() {
           </section>
         )}
       </main>
+
+      {isExitDialogOpen && (
+        <div className="exit-dialog-backdrop" role="presentation">
+          <div aria-modal="true" className="exit-dialog" role="dialog">
+            <h2>{t.exitConfirmTitle}</h2>
+            <p>{t.exitConfirmText}</p>
+            <div className="exit-dialog-actions">
+              <button className="secondary-button" onClick={handleCancelExit} type="button">
+                {t.exitConfirmNo}
+              </button>
+              <button className="primary-button" onClick={handleConfirmExit} type="button">
+                {t.exitConfirmYes}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

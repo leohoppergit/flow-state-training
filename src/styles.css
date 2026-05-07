@@ -25,6 +25,12 @@ html {
   overscroll-behavior-y: contain;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -34,6 +40,7 @@ body {
     radial-gradient(circle at top left, rgba(143, 240, 216, 0.16), transparent 28%),
     radial-gradient(circle at top right, rgba(255, 138, 108, 0.16), transparent 34%),
     linear-gradient(180deg, #0d1018 0%, #121927 100%);
+  background-color: #0d1018;
   color: var(--text);
   overflow-x: hidden;
   overscroll-behavior-y: contain;
@@ -676,6 +683,45 @@ button {
   border: 1px solid rgba(255, 127, 127, 0.35);
   background: rgba(255, 127, 127, 0.12);
   color: #ffd3d3;
+}
+
+.exit-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 8, 13, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.exit-dialog {
+  width: min(420px, 100%);
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(14, 18, 28, 0.98);
+  box-shadow: var(--shadow);
+}
+
+.exit-dialog h2 {
+  margin: 0;
+  font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
+  font-size: 2rem;
+}
+
+.exit-dialog p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.exit-dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 22px;
 }
 
 .session-panel.work .timer-card {

@@ -5,10 +5,10 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["fullscreen", "standalone"],
+  "display_override": ["standalone"],
   "orientation": "portrait",
-  "background_color": "#10131d",
-  "theme_color": "#10131d",
+  "background_color": "#0d1018",
+  "theme_color": "#0d1018",
   "categories": ["fitness", "health", "sports"],
   "icons": [
     {
