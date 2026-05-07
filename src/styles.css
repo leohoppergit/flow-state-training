@@ -21,7 +21,7 @@
 
 html {
   min-height: 100%;
-  background: #0d1018;
+  background: #17201f;
   overscroll-behavior-y: contain;
 }
 
@@ -40,7 +40,7 @@ body {
     radial-gradient(circle at top left, rgba(143, 240, 216, 0.16), transparent 28%),
     radial-gradient(circle at top right, rgba(255, 138, 108, 0.16), transparent 34%),
     linear-gradient(180deg, #0d1018 0%, #121927 100%);
-  background-color: #0d1018;
+  background-color: #17201f;
   color: var(--text);
   overflow-x: hidden;
   overscroll-behavior-y: contain;

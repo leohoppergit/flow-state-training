@@ -366,6 +366,7 @@ function getStepSeconds(step: WorkoutStep | undefined) {
 export default function App() {
   const language = detectDeviceLanguage();
   const exitConfirmedRef = useRef(false);
+  const exitDialogOpenRef = useRef(false);
   const [hasEnteredGenerator, setHasEnteredGenerator] = useState(false);
   const [generatorTab, setGeneratorTab] = useState<GeneratorTab>("workout");
   const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>("all");
@@ -430,7 +431,9 @@ export default function App() {
         return;
       }
 
+      exitDialogOpenRef.current = true;
       setIsExitDialogOpen(true);
+      window.history.pushState(exitGuardState, "", window.location.href);
     }
 
     window.addEventListener("popstate", handleBackNavigation);
@@ -601,17 +604,21 @@ export default function App() {
   }
 
   function handleCancelExit() {
+    exitDialogOpenRef.current = false;
     setIsExitDialogOpen(false);
-    window.history.pushState({ flowStateExitGuard: true }, "", window.location.href);
   }
 
   function handleConfirmExit() {
     exitConfirmedRef.current = true;
+    exitDialogOpenRef.current = false;
     setIsExitDialogOpen(false);
 
     window.setTimeout(() => {
-      window.history.go(-1);
-      window.setTimeout(() => window.close(), 120);
+      window.history.go(-2);
+      window.setTimeout(() => {
+        window.history.back();
+        window.close();
+      }, 160);
     }, 0);
   }
 
