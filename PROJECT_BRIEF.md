@@ -2,54 +2,54 @@
 
 ## Produktziel
 
-Die App soll in wenigen Sekunden ein sinnvolles Bodyweight- oder Calisthenics-Workout zusammenstellen. Statt vor jedem Training neu zu ueberlegen, welche Uebungen heute dran sind, waehlt der Nutzer ein paar Parameter aus und bekommt direkt ein strukturiertes Workout mit Timer, Pausen und Runden.
+Die App soll in wenigen Sekunden ein sinnvolles Bodyweight- oder Calisthenics-Workout zusammenstellen. Statt vor jedem Training neu zu überlegen, welche Übungen heute dran sind, wählt der Nutzer ein paar Parameter aus und bekommt direkt ein strukturiertes Workout mit Timer, Pausen und Runden.
 
 ## Kernversprechen
 
 - Schnell vom Start zur fertigen Session
 - Keine lange Entscheidungsphase vor dem Workout
 - Zufall ja, aber nicht chaotisch
-- Mobile-first, damit die App direkt waehrend des Trainings nutzbar ist
+- Mobile-first, damit die App direkt während des Trainings nutzbar ist
 
 ## Nutzerfluss
 
-1. Nutzer waehlt einen Fokus:
-   - Oberkoerper
+1. Nutzer wählt einen Fokus:
+   - Oberkörper
    - Core
-   - Unterkoerper
+   - Unterkörper
    - Ausgewogen
 2. Nutzer stellt das Workout ein:
-   - Anzahl an Uebungen
-   - Arbeitszeit pro Uebung oder Gesamtdauer des Workouts
-   - Pausendauer
+   - Anzahl an Übungen
+   - Arbeitszeit pro Übung oder Gesamtdaür des Workouts
+   - Pausendaür
    - Anzahl an Runden
-3. Die App waehlt zufaellig passende Uebungen aus einem definierten Uebungspool aus.
-4. Die App fuehrt durch das Workout:
-   - aktuelle Uebung
+3. Die App wählt zufällig passende Übungen aus einem definierten Übungspool aus.
+4. Die App führt durch das Workout:
+   - aktuelle Übung
    - Restzeit
    - Pause
-   - naechste Uebung
+   - nächste Übung
    - aktuelle Runde
 5. Am Ende sieht der Nutzer eine kurze Zusammenfassung und kann das Workout neu mischen oder erneut starten.
 
 ## Wichtigste Produktlogik
 
-Die Random-Auswahl sollte nicht nur blind aus dem Pool ziehen. Sonst fuehlt sich die App schnell beliebig oder unausgewogen an.
+Die Random-Auswahl sollte nicht nur blind aus dem Pool ziehen. Sonst fühlt sich die App schnell beliebig oder unausgewogen an.
 
-Sinnvolle Regeln fuer das MVP:
+Sinnvolle Regeln für das MVP:
 
 - Keine exakten Duplikate in einem Workout
-- Keine zu aehnlichen Uebungen direkt hintereinander
-- Fokus bestimmt die Gewichtung der Uebungen
-- Bei "Ausgewogen" muessen Oberkoerper, Core und Unterkoerper sinnvoll vertreten sein
-- Schwierige Uebungen sollten mit leichteren oder statischeren Uebungen gemischt werden
-- Einseitige Uebungen muessen klar markiert werden, falls sie spaeter unterstuetzt werden
+- Keine zu ähnlichen Übungen direkt hintereinander
+- Fokus bestimmt die Gewichtung der Übungen
+- Bei "Ausgewogen" müssen Oberkörper, Core und Unterkörper sinnvoll vertreten sein
+- Schwierige Übungen sollten mit leichteren oder statischeren Übungen gemischt werden
+- Einseitige Übungen müssen klar markiert werden, falls sie später unterstützt werden
 
-## Vorschlag fuer Uebungskategorien
+## Vorschlag für Übungskategorien
 
-Damit die App spaeter gute Zufalls-Workouts bauen kann, sollte jede Uebung Tags bekommen:
+Damit die App später gute Zufalls-Workouts baün kann, sollte jede Übung Tags bekommen:
 
-- Fokus: Oberkoerper, Core, Unterkoerper, Full Body
+- Fokus: Oberkörper, Core, Unterkörper, Full Body
 - Bewegungsmuster: Push, Pull, Squat, Lunge, Hinge, Static Hold, Rotation, Flexion
 - Schwierigkeit: leicht, mittel, schwer
 - Modus: zeitbasiert oder wiederholungsbasiert
@@ -57,59 +57,59 @@ Damit die App spaeter gute Zufalls-Workouts bauen kann, sollte jede Uebung Tags 
 
 ## MVP-Umfang
 
-Fuer Version 1 wuerde ich es bewusst schlank halten:
+Für Version 1 würde ich es bewusst schlank halten:
 
-- Ein Bildschirm fuer die Workout-Konfiguration
-- Ein definierter Uebungspool von ca. 25 bis 40 Uebungen
+- Ein Bildschirm für die Workout-Konfiguration
+- Ein definierter Übungspool von ca. 25 bis 40 Übungen
 - Zufallslogik mit einfachen Regeln
 - Ein Session-Screen mit grossen Timern und klaren Zustandswechseln
 - Pause, Skip, Restart und Re-roll
 - Speicherung der letzten Einstellungen im Browser
 
-## Was ich fuer spaeter einplanen wuerde
+## Was ich für später einplanen würde
 
 - Schwierigkeitsfilter
 - Equipment-Filter
-- Favoriten oder Blocklist fuer unbeliebte Uebungen
-- Eigene Uebungen anlegen
+- Favoriten oder Blocklist für unbeliebte Übungen
+- Eigene Übungen anlegen
 - Trainingshistorie
 - Vorgefertigte Modi wie "EMOM", "AMRAP", "Tabata" oder "Skill Day"
 
 ## Produkt- und UX-Hinweise
 
 - Die App sollte eher wie ein Trainingswerkzeug als wie ein Formular wirken
-- Waehlt der Nutzer zu viele Einstellungen auf einmal, verliert man den Zeitvorteil
+- Wählt der Nutzer zu viele Einstellungen auf einmal, verliert man den Zeitvorteil
 - Der Session-Screen muss extrem klar sein: grosse Schrift, starke Kontraste, wenig Ablenkung
-- Audio- oder Vibrationssignale waeren spaeter sehr wertvoll
+- Audio- oder Vibrationssignale wären später sehr wertvoll
 
-## Technischer Vorschlag fuer den Start
+## Technischer Vorschlag für den Start
 
-Ich wuerde fuer den MVP eine rein clientseitige Webapp bauen:
+Ich würde für den MVP eine rein clientseitige Webapp baün:
 
 - React
 - TypeScript
 - Vite
-- einfache lokale JSON-Datei fuer den Uebungspool
+- einfache lokale JSON-Datei für den Übungspool
 - lokaler State statt Backend
-- Speicherung ueber localStorage
+- Speicherung über localStorage
 
 Warum so:
 
 - schnell startbar
-- kein Backend noetig
+- kein Backend nötig
 - gut mobil nutzbar
-- spaeter problemlos erweiterbar
+- später problemlos erweiterbar
 
 ## Erste Architekturidee
 
 - `src/data/exercises.ts`
   - definierter Pool mit Metadaten
 - `src/lib/generateWorkout.ts`
-  - Regelwerk fuer die Auswahl
+  - Regelwerk für die Auswahl
 - `src/components/setup/*`
   - Konfiguration des Workouts
 - `src/components/session/*`
-  - Timer, Uebungskarte, Fortschritt
+  - Timer, Übungskarte, Fortschritt
 - `src/pages` oder ein einfacher Single-Page-Flow
   - Setup -> Session -> Summary
 
@@ -117,23 +117,23 @@ Warum so:
 
 Diese Punkte sind inzwischen entschieden:
 
-1. "Trainingsdauer" meint die Arbeitszeit pro Uebung, zum Beispiel 30s, 40s oder 50s.
+1. "Trainingsdaür" meint die Arbeitszeit pro Übung, zum Beispiel 30s, 40s oder 50s.
 2. V1 ist komplett zeitbasiert, nicht rep-basiert.
 3. Equipment an Calisthenics-Spots soll direkt mitgedacht werden, zum Beispiel Klimmzugstange, Barren, Bank oder Ringe.
 
-Hinweis zur Dauerberechnung fuer den MVP:
+Hinweis zur Daürberechnung für den MVP:
 
-- Die App berechnet die Session aus Work- und Rest-Phasen ueber alle Slots.
-- Es gibt keine zusaetzliche separate Rundenpause.
-- Die letzte Uebung endet direkt ohne eine abschliessende Extra-Pause.
+- Die App berechnet die Session aus Work- und Rest-Phasen über alle Slots.
+- Es gibt keine zusätzliche separate Rundenpause.
+- Die letzte Übung endet direkt ohne eine abschliessende Extra-Pause.
 
-## Meine Empfehlung fuer den naechsten Schritt
+## Meine Empfehlung für den nächsten Schritt
 
-Wenn du willst, bauen wir jetzt direkt den MVP mit diesen Annahmen:
+Wenn du willst, baün wir jetzt direkt den MVP mit diesen Annahmen:
 
 - nur zeitbasierte Workouts
 - nur bodyweight ohne Equipment
-- Fokus, Uebungsanzahl, Arbeitszeit, Pause und Runden als Eingaben
+- Fokus, Übungsanzahl, Arbeitszeit, Pause und Runden als Eingaben
 - mobile-first Single-Page-Webapp
 
-Dann kann ich im naechsten Schritt sofort das Projekt scaffolden und die erste lauffaehige Version anlegen.
+Dann kann ich im nächsten Schritt sofort das Projekt scaffolden und die erste lauffähige Version anlegen.

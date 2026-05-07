@@ -2,6 +2,7 @@ import { exercises } from "../data/exercises";
 import type {
   Exercise,
   ExerciseFocus,
+  ExercisePreferences,
   Focus,
   GeneratedWorkout,
   WorkoutSettings,
@@ -42,7 +43,25 @@ function getOverlapCount(first: Exercise, second: Exercise) {
   return first.movementPatterns.filter((pattern) => second.movementPatterns.includes(pattern)).length;
 }
 
-function scoreCandidate(candidate: Exercise, desiredFocus: ExerciseFocus, previous?: Exercise) {
+function getPreferenceScore(candidate: Exercise, preferences: ExercisePreferences) {
+  const preference = preferences[candidate.id];
+
+  if (!preference) {
+    return 0;
+  }
+
+  const skillBonus = [0, 0.25, 0.75, 1.15][preference.skillLevel];
+  const focusBonus = preference.isTrainingFocus ? 1.25 : 0;
+
+  return skillBonus + focusBonus;
+}
+
+function scoreCandidate(
+  candidate: Exercise,
+  desiredFocus: ExerciseFocus,
+  preferences: ExercisePreferences,
+  previous?: Exercise
+) {
   let score = Math.random();
 
   if (candidate.primaryFocus === desiredFocus) {
@@ -69,18 +88,21 @@ function scoreCandidate(candidate: Exercise, desiredFocus: ExerciseFocus, previo
     score -= 1;
   }
 
+  score += getPreferenceScore(candidate, preferences);
+
   return score;
 }
 
 function pickExercise(
   remaining: Exercise[],
   desiredFocus: ExerciseFocus,
+  preferences: ExercisePreferences,
   previous?: Exercise
 ) {
   const ranked = remaining
     .map((exercise) => ({
       exercise,
-      score: scoreCandidate(exercise, desiredFocus, previous)
+      score: scoreCandidate(exercise, desiredFocus, preferences, previous)
     }))
     .sort((first, second) => second.score - first.score);
 
@@ -108,12 +130,12 @@ export function calculateWorkoutTotals(settings: WorkoutSettings) {
   };
 }
 
-export function generateWorkout(settings: WorkoutSettings): GeneratedWorkout {
+export function generateWorkout(settings: WorkoutSettings, preferences: ExercisePreferences = {}): GeneratedWorkout {
   const eligibleExercises = getEligibleExercises(settings);
 
   if (eligibleExercises.length < settings.exerciseCount) {
     throw new Error(
-      `Mit der aktuellen Equipment-Auswahl gibt es nur ${eligibleExercises.length} passende Uebungen.`
+      `Mit der aktuellen Equipment-Auswahl gibt es nur ${eligibleExercises.length} passende Übungen.`
     );
   }
 
@@ -123,7 +145,7 @@ export function generateWorkout(settings: WorkoutSettings): GeneratedWorkout {
 
   focusPlan.forEach((desiredFocus) => {
     const previous = selected[selected.length - 1];
-    const nextExercise = pickExercise(remaining, desiredFocus, previous);
+    const nextExercise = pickExercise(remaining, desiredFocus, preferences, previous);
 
     if (!nextExercise) {
       return;
@@ -135,7 +157,7 @@ export function generateWorkout(settings: WorkoutSettings): GeneratedWorkout {
   });
 
   if (selected.length < settings.exerciseCount) {
-    throw new Error("Das Workout konnte nicht vollstaendig generiert werden.");
+    throw new Error("Das Workout konnte nicht vollständig generiert werden.");
   }
 
   return {

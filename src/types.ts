@@ -17,6 +17,7 @@ export type MovementPattern =
   | "extension"
   | "cardio";
 export type Difficulty = "easy" | "moderate" | "hard";
+export type SkillLevel = 0 | 1 | 2 | 3;
 
 export interface Exercise {
   id: string;
@@ -37,6 +38,13 @@ export interface WorkoutSettings {
   rounds: number;
   availableEquipment: OptionalEquipment[];
 }
+
+export interface ExercisePreference {
+  skillLevel: SkillLevel;
+  isTrainingFocus: boolean;
+}
+
+export type ExercisePreferences = Record<string, ExercisePreference>;
 
 export interface GeneratedWorkout {
   exercises: Exercise[];

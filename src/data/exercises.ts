@@ -19,7 +19,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["push", "static"],
     difficulty: "moderate",
     equipment: ["bench"],
-    cue: "Fuesse erhoehen und Schultern aktiv ueber die Haende bringen."
+    cue: "Füße erhöhen und Schultern aktiv über die Hände bringen."
   },
   {
     id: "pike-push-ups",
@@ -29,7 +29,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["push", "hinge"],
     difficulty: "moderate",
     equipment: ["none"],
-    cue: "Huefte hoch lassen und den Kopf zwischen die Haende absenken."
+    cue: "Hüfte hoch lassen und den Kopf zwischen die Hände absenken."
   },
   {
     id: "bar-dips",
@@ -39,7 +39,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["push"],
     difficulty: "hard",
     equipment: ["dip-bars"],
-    cue: "Schultern tief halten und kontrolliert aus dem Dip druecken."
+    cue: "Schultern tief halten und kontrolliert aus dem Dip drücken."
   },
   {
     id: "bench-dips",
@@ -59,7 +59,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["pull", "static"],
     difficulty: "hard",
     equipment: ["pull-up-bar"],
-    cue: "Mit Spannung haengen und die Brust aktiv zur Stange ziehen."
+    cue: "Mit Spannung hängen und die Brust aktiv zur Stange ziehen."
   },
   {
     id: "chin-ups",
@@ -79,7 +79,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["pull", "static"],
     difficulty: "easy",
     equipment: ["pull-up-bar"],
-    cue: "Nur die Schulterblaetter bewegen, Arme bleiben fast gestreckt."
+    cue: "Nur die Schulterblätter bewegen, Arme bleiben fast gestreckt."
   },
   {
     id: "ring-rows",
@@ -89,7 +89,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["pull", "static"],
     difficulty: "moderate",
     equipment: ["rings"],
-    cue: "Koerper als Brett halten und die Ringe Richtung Rippen ziehen."
+    cue: "Körper als Brett halten und die Ringe Richtung Rippen ziehen."
   },
   {
     id: "support-hold",
@@ -99,7 +99,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["static", "push"],
     difficulty: "moderate",
     equipment: ["dip-bars"],
-    cue: "Arme lang lassen und dich aktiv aus den Schultern herausdruecken."
+    cue: "Arme lang lassen und dich aktiv aus den Schultern herausdrücken."
   },
   {
     id: "plank-shoulder-taps",
@@ -119,7 +119,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["static", "flexion"],
     difficulty: "moderate",
     equipment: ["none"],
-    cue: "Lendenwirbelsaeule in den Boden druecken und Spannung halten."
+    cue: "Lendenwirbelsäule in den Boden drücken und Spannung halten."
   },
   {
     id: "dead-bug",
@@ -149,7 +149,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["cardio", "flexion", "static"],
     difficulty: "moderate",
     equipment: ["none"],
-    cue: "Schultern ueber den Haenden halten und das Tempo sauber kontrollieren."
+    cue: "Schultern über den Händen halten und das Tempo sauber kontrollieren."
   },
   {
     id: "side-plank",
@@ -159,7 +159,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["static", "rotation"],
     difficulty: "easy",
     equipment: ["none"],
-    cue: "Huefte hoch halten und aktiv in den Unterarm druecken."
+    cue: "Hüfte hoch halten und aktiv in den Unterarm drücken."
   },
   {
     id: "hanging-knee-raises",
@@ -179,7 +179,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["flexion", "static"],
     difficulty: "hard",
     equipment: ["pull-up-bar"],
-    cue: "Beine gestreckt fuehren und den Oberkoerper stabil halten."
+    cue: "Beine gestreckt führen und den Oberkörper stabil halten."
   },
   {
     id: "ring-knee-tucks",
@@ -209,7 +209,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["squat", "cardio"],
     difficulty: "moderate",
     equipment: ["none"],
-    cue: "Sanft landen und die Spannung direkt fuer den naechsten Sprung nutzen."
+    cue: "Sanft landen und die Spannung direkt für den nächsten Sprung nutzen."
   },
   {
     id: "reverse-lunges",
@@ -229,7 +229,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["lunge"],
     difficulty: "moderate",
     equipment: ["none"],
-    cue: "Sauber senkrecht arbeiten und die Last im vorderen Fuss spueren."
+    cue: "Sauber senkrecht arbeiten und die Last im vorderen Fuß spüren."
   },
   {
     id: "step-ups",
@@ -239,7 +239,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["lunge"],
     difficulty: "moderate",
     equipment: ["bench"],
-    cue: "Dich bewusst ueber das Standbein hochdruecken statt abzustossen."
+    cue: "Dich bewusst über das Standbein hochdrücken statt abzustoßen."
   },
   {
     id: "glute-bridge",
@@ -249,7 +249,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["hinge"],
     difficulty: "easy",
     equipment: ["none"],
-    cue: "Oben kurz halten und die Huefte komplett strecken."
+    cue: "Oben kurz halten und die Hüfte komplett strecken."
   },
   {
     id: "single-leg-glute-bridge",
@@ -259,7 +259,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["hinge"],
     difficulty: "moderate",
     equipment: ["none"],
-    cue: "Becken gerade halten und ueber die Ferse arbeiten."
+    cue: "Becken gerade halten und über die Ferse arbeiten."
   },
   {
     id: "wall-sit",
@@ -269,7 +269,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["static", "squat"],
     difficulty: "easy",
     equipment: ["none"],
-    cue: "Druck gleichmaessig ueber beide Fuesse verteilen und ruhig atmen."
+    cue: "Druck gleichmäßig über beide Füße verteilen und ruhig atmen."
   },
   {
     id: "calf-raise-pulses",
@@ -279,7 +279,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["static"],
     difficulty: "easy",
     equipment: ["none"],
-    cue: "Huefte stabil halten und die Bewegung komplett aus dem Fussgelenk holen."
+    cue: "Hüfte stabil halten und die Bewegung komplett aus dem Fußgelenk holen."
   },
   {
     id: "burpees",
@@ -309,7 +309,7 @@ export const exercises: Exercise[] = [
     movementPatterns: ["hinge", "push", "static"],
     difficulty: "moderate",
     equipment: ["none"],
-    cue: "Lang nach vorne laufen und die Rueckwaertsbewegung kontrolliert halten."
+    cue: "Lang nach vorne laufen und die Rückwärtsbewegung kontrolliert halten."
   },
   {
     id: "toes-to-bar-taps",

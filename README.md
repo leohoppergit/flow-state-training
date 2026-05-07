@@ -4,9 +4,9 @@ Eine mobile-first Webapp, die aus wenigen Eingaben ein zeitbasiertes Bodyweight-
 
 ## Enthalten im MVP
 
-- Fokuswahl fuer Oberkoerper, Core, Unterkoerper oder Ausgewogen
+- Fokuswahl für Oberkörper, Core, Unterkörper oder Ausgewogen
 - Zeitbasierte Session mit Work- und Rest-Timer
-- Uebungspool mit Equipment-Tags fuer Calisthenics-Spots
+- Übungspool mit Equipment-Tags für Calisthenics-Spots
 - Zufallsgenerator mit einfachen Regeln statt blindem Shuffle
 - Session-Ansicht mit Fortschritt, Reset, Skip und Re-roll
 - Speicherung der letzten Einstellungen im Browser
@@ -26,7 +26,7 @@ npm run build
 
 ## Projektstruktur
 
-- `src/data/exercises.ts` definiert den Uebungspool
-- `src/lib/generateWorkout.ts` enthaelt Auswahl- und Sessionlogik
+- `src/data/exercises.ts` definiert den Übungspool
+- `src/lib/generateWorkout.ts` enthält Auswahl- und Sessionlogik
 - `src/App.tsx` bildet Setup, Workout-Session und Summary ab
-- `src/styles.css` enthaelt das mobile-first UI
+- `src/styles.css` enthält das mobile-first UI
