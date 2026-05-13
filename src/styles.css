@@ -814,10 +814,32 @@ button {
   margin-top: 22px;
 }
 
-.exercise-chip {
+.exercise-chip-wrap {
   flex: 1 1 180px;
+  position: relative;
+  min-width: 180px;
+}
+
+.exercise-chip {
+  width: 100%;
+  border: 1px solid var(--line);
   border-radius: 20px;
   padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text);
+  text-align: left;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.exercise-chip.selected {
+  border-color: rgba(143, 240, 216, 0.54);
+  background: rgba(143, 240, 216, 0.12);
+}
+
+.exercise-chip.replacement-target {
+  border-color: rgba(255, 190, 107, 0.62);
+  background: rgba(255, 190, 107, 0.14);
 }
 
 .exercise-chip span,
@@ -842,8 +864,151 @@ button {
 .exercise-chip small {
   display: block;
   margin-top: 8px;
-  text-transform: capitalize;
   color: var(--muted);
+}
+
+.customize-hint {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.exercise-detail-card,
+.replacement-card {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+  border: 1px solid rgba(143, 240, 216, 0.28);
+  border-radius: 22px;
+  padding: 18px;
+  background: rgba(12, 18, 24, 0.78);
+}
+
+.exercise-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.exercise-detail-head h3,
+.exercise-detail-card p,
+.exercise-detail-card ul {
+  margin: 0;
+}
+
+.exercise-detail-card p,
+.exercise-detail-card li {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.exercise-detail-card ul {
+  display: grid;
+  gap: 8px;
+  padding-left: 20px;
+}
+
+.exercise-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.exercise-detail-meta span {
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.detail-close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.replacement-dropdown {
+  z-index: 20;
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  min-width: min(320px, calc(100vw - 48px));
+  border: 1px solid rgba(255, 190, 107, 0.36);
+  border-radius: 18px;
+  padding: 10px;
+  background: rgba(12, 18, 24, 0.98);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.35);
+}
+
+.replacement-dropdown-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--sun);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.replacement-dropdown-head button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.replacement-dropdown-list {
+  display: grid;
+  gap: 7px;
+  max-height: min(42vh, 320px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.replacement-dropdown-list button {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text);
+  text-align: left;
+}
+
+.replacement-dropdown-list button.already-selected {
+  opacity: 0.68;
+}
+
+.replacement-dropdown-list strong,
+.replacement-dropdown-list small {
+  display: block;
+}
+
+.replacement-dropdown-list small {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 .complete-panel .complete-list {

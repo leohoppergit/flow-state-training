@@ -11,6 +11,7 @@ import { equipmentOptions, focusOptions } from "./types";
 import type {
   Difficulty,
   Equipment,
+  Exercise,
   ExerciseFocus,
   ExercisePreference,
   ExercisePreferences,
@@ -28,6 +29,12 @@ const exercisePreferencesStorageKey = "flow-state-training-exercise-preferences"
 type Language = "de" | "en";
 type GeneratorTab = "workout" | "exercises";
 type ExerciseFilter = "all" | ExerciseFocus;
+type TorchMediaTrackCapabilities = MediaTrackCapabilities & {
+  torch?: boolean;
+};
+type TorchMediaTrackConstraintSet = MediaTrackConstraintSet & {
+  torch?: boolean;
+};
 type AppCopy = {
   focusLabels: Record<Focus, { title: string; subtitle: string }>;
   equipmentLabels: Record<OptionalEquipment, string>;
@@ -90,6 +97,9 @@ const copy = {
     nextRound: "Nächste Runde",
     pauseClock: "Pause Uhr",
     startPauseClock: "Pause Uhr starten",
+    swapExercise: "Übung austauschen",
+    chooseReplacement: "Ersatzübung wählen",
+    customizeWorkoutHint: "Tippe eine Übung an, um sie vor dem Start auszutauschen. Long Press zeigt Details.",
     done: "Fertig",
     completed: "Workout abgeschlossen",
     generatedFromSelection: "Auf Basis deiner Auswahl generiert",
@@ -182,6 +192,9 @@ const copy = {
     nextRound: "Next round",
     pauseClock: "Pause clock",
     startPauseClock: "Start break clock",
+    swapExercise: "Swap exercise",
+    chooseReplacement: "Choose replacement",
+    customizeWorkoutHint: "Tap an exercise to swap it before you start. Long press shows details.",
     done: "Done",
     completed: "Workout complete",
     generatedFromSelection: "Generated from your setup",
@@ -272,6 +285,13 @@ const defaultExercisePreference: ExercisePreference = {
 };
 const skillLevels = [0, 1, 2, 3] as const;
 const exerciseFilterOptions = ["all", "upper", "core", "lower", "full-body"] as const;
+const countdownCues: Record<number, string> = {
+  5: "Five",
+  4: "Four",
+  3: "Three",
+  2: "Two",
+  1: "One"
+};
 
 function loadStoredSettings() {
   if (typeof window === "undefined") {
@@ -363,10 +383,120 @@ function getStepSeconds(step: WorkoutStep | undefined) {
   return step.seconds;
 }
 
+function getExerciseInstructions(exercise: Exercise) {
+  const patternInstructions: Partial<Record<(typeof exercise.movementPatterns)[number], string>> = {
+    push: "Brace your core, keep the shoulders active, and press through a clean full range.",
+    pull: "Start with active shoulders, pull under control, and avoid swinging into the rep.",
+    squat: "Keep your heels grounded, knees tracking cleanly, and stand up with full hip extension.",
+    lunge: "Step with control, keep the front knee stable, and drive through the whole front foot.",
+    hinge: "Move from the hips first, keep your back long, and return with controlled tension.",
+    static: "Build full-body tension, breathe calmly, and hold the position without collapsing.",
+    rotation: "Move slowly, keep the ribs stacked, and resist twisting from momentum.",
+    flexion: "Curl from the trunk with control and keep the lower back from arching away.",
+    extension: "Reach long through the body and avoid rushing the end position.",
+    cardio: "Find a repeatable rhythm and keep each rep clean even as the pace rises."
+  };
+
+  return exercise.movementPatterns
+    .map((pattern) => patternInstructions[pattern])
+    .filter((instruction): instruction is string => Boolean(instruction))
+    .slice(0, 3);
+}
+
+function speakCountdownCue(cue: string) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    return;
+  }
+
+  const utterance = new SpeechSynthesisUtterance(cue);
+  const voices = window.speechSynthesis.getVoices();
+  const englishVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("en"));
+  const preferredVoiceNames = [
+    "samantha",
+    "alex",
+    "karen",
+    "daniel",
+    "moira",
+    "tessa",
+    "google us english",
+    "google uk english female",
+    "google uk english male",
+    "microsoft aria",
+    "microsoft jenny",
+    "microsoft guy",
+    "enhanced",
+    "premium",
+    "neural"
+  ];
+  const englishVoice =
+    preferredVoiceNames
+      .map((voiceName) =>
+        englishVoices.find((voice) => voice.name.toLowerCase().includes(voiceName))
+      )
+      .find(Boolean) ?? englishVoices[0];
+
+  utterance.lang = "en-US";
+  utterance.volume = 1;
+  utterance.rate = 0.72;
+  utterance.pitch = 0.96;
+
+  if (englishVoice) {
+    utterance.voice = englishVoice;
+    utterance.lang = englishVoice.lang;
+  }
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+}
+
+async function setTorch(track: MediaStreamTrack | null, isEnabled: boolean) {
+  if (!track) {
+    return false;
+  }
+
+  const capabilities = track.getCapabilities() as TorchMediaTrackCapabilities;
+
+  if (!capabilities.torch) {
+    return false;
+  }
+
+  try {
+    await track.applyConstraints({
+      advanced: [{ torch: isEnabled } as TorchMediaTrackConstraintSet]
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function blinkTorch(track: MediaStreamTrack | null, times: number) {
+  if (!track) {
+    return;
+  }
+
+  for (let index = 0; index < times; index += 1) {
+    const didEnable = await setTorch(track, true);
+
+    if (!didEnable) {
+      return;
+    }
+
+    await new Promise((resolve) => window.setTimeout(resolve, times > 1 ? 80 : 140));
+    await setTorch(track, false);
+    await new Promise((resolve) => window.setTimeout(resolve, times > 1 ? 70 : 90));
+  }
+}
+
 export default function App() {
   const language = detectDeviceLanguage();
   const exitConfirmedRef = useRef(false);
   const exitDialogOpenRef = useRef(false);
+  const lastSpokenCountdownRef = useRef("");
+  const torchTrackRef = useRef<MediaStreamTrack | null>(null);
+  const timerCardRef = useRef<HTMLDivElement | null>(null);
+  const longPressTimerRef = useRef<number | null>(null);
+  const didLongPressRef = useRef(false);
   const [hasEnteredGenerator, setHasEnteredGenerator] = useState(false);
   const [generatorTab, setGeneratorTab] = useState<GeneratorTab>("workout");
   const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>("all");
@@ -382,14 +512,29 @@ export default function App() {
   const [stepIndex, setStepIndex] = useState(0);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [hasStartedSession, setHasStartedSession] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [roundBreakSeconds, setRoundBreakSeconds] = useState(0);
+  const [selectedWorkoutExerciseId, setSelectedWorkoutExerciseId] = useState<string | null>(null);
+  const [replacementExerciseId, setReplacementExerciseId] = useState<string | null>(null);
 
   const eligibleExercises = getEligibleExercises(settings);
   const totals = calculateWorkoutTotals(settings);
   const currentStep = timeline[stepIndex];
   const currentWorkStep = currentStep?.kind === "work" ? currentStep : undefined;
   const currentRoundBreak = currentStep?.kind === "round-break" ? currentStep : undefined;
+  const selectedWorkoutExercise = workout?.exercises.find(
+    (exercise) => exercise.id === selectedWorkoutExerciseId
+  );
+  const replacementExercise = workout?.exercises.find((exercise) => exercise.id === replacementExerciseId);
+  const replacementOptions = replacementExercise && workout
+    ? eligibleExercises.filter(
+        (exercise) =>
+          exercise.id !== replacementExercise.id &&
+          !workout.exercises.some((workoutExercise) => workoutExercise.id === exercise.id)
+      )
+    : [];
+  const canCustomizeWorkout = mode === "session" && !hasStartedSession && !isRunning;
   const completedSteps = timeline.slice(0, stepIndex).filter((step) => step.kind === "work").length;
   const totalWorkBlocks = settings.exerciseCount * settings.rounds;
   const progressPercent = totalWorkBlocks === 0 ? 0 : (completedSteps / totalWorkBlocks) * 100;
@@ -416,8 +561,27 @@ export default function App() {
   }, [exercisePreferences]);
 
   useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      return;
+    }
+
+    window.speechSynthesis.getVoices();
+  }, []);
+
+  useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) {
+        window.clearTimeout(longPressTimerRef.current);
+      }
+      void setTorch(torchTrackRef.current, false);
+      torchTrackRef.current?.stop();
+      torchTrackRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     const exitGuardState = { flowStateExitGuard: true };
@@ -442,6 +606,34 @@ export default function App() {
       window.removeEventListener("popstate", handleBackNavigation);
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      mode !== "session" ||
+      !isRunning ||
+      (currentStep?.kind !== "work" && currentStep?.kind !== "rest") ||
+      remainingSeconds < 0 ||
+      remainingSeconds > 5
+    ) {
+      return;
+    }
+
+    const cue =
+      remainingSeconds === 0
+        ? currentStep.kind === "work"
+          ? "Rest!"
+          : "Go!"
+        : countdownCues[remainingSeconds];
+    const spokenKey = `${stepIndex}:${remainingSeconds}`;
+
+    if (!cue || lastSpokenCountdownRef.current === spokenKey) {
+      return;
+    }
+
+    lastSpokenCountdownRef.current = spokenKey;
+    speakCountdownCue(cue);
+    void blinkTorch(torchTrackRef.current, remainingSeconds === 0 ? 3 : 1);
+  }, [currentStep?.kind, isRunning, mode, remainingSeconds, stepIndex]);
 
   useEffect(() => {
     if (mode !== "session" || !isRunning || currentStep?.kind === "round-break") {
@@ -535,7 +727,82 @@ export default function App() {
     return optionalEquipment.map((item) => equipmentLabels[item]).join(", ");
   }
 
-  function startNewWorkout(nextWorkout: GeneratedWorkout) {
+  async function prepareTorch() {
+    if (
+      torchTrackRef.current ||
+      typeof navigator === "undefined" ||
+      !navigator.mediaDevices?.getUserMedia
+    ) {
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" }
+        }
+      });
+      const [track] = stream.getVideoTracks();
+      const capabilities = track?.getCapabilities() as TorchMediaTrackCapabilities | undefined;
+
+      if (track && capabilities?.torch) {
+        torchTrackRef.current = track;
+        await setTorch(track, false);
+        return;
+      }
+
+      stream.getTracks().forEach((streamTrack) => streamTrack.stop());
+    } catch {
+      torchTrackRef.current = null;
+    }
+  }
+
+  function toggleTimer() {
+    if (!isRunning) {
+      void prepareTorch();
+      setHasStartedSession(true);
+      setReplacementExerciseId(null);
+      setSelectedWorkoutExerciseId(null);
+      window.requestAnimationFrame(() => {
+        timerCardRef.current?.focus({ preventScroll: true });
+        timerCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+
+    setIsRunning((value) => !value);
+  }
+
+  function clearExerciseLongPress() {
+    if (!longPressTimerRef.current) {
+      return;
+    }
+
+    window.clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  }
+
+  function startExerciseLongPress(exerciseId: string) {
+    clearExerciseLongPress();
+    didLongPressRef.current = false;
+    longPressTimerRef.current = window.setTimeout(() => {
+      didLongPressRef.current = true;
+      setSelectedWorkoutExerciseId(exerciseId);
+      setReplacementExerciseId(null);
+      longPressTimerRef.current = null;
+    }, 520);
+  }
+
+  function replaceWorkoutExercise(nextExercise: Exercise) {
+    if (!workout || !replacementExerciseId) {
+      return;
+    }
+
+    const nextWorkout: GeneratedWorkout = {
+      ...workout,
+      exercises: workout.exercises.map((exercise) =>
+        exercise.id === replacementExerciseId ? nextExercise : exercise
+      )
+    };
     const nextTimeline = buildSessionTimeline(nextWorkout);
 
     setWorkout(nextWorkout);
@@ -543,6 +810,22 @@ export default function App() {
     setStepIndex(0);
     setRemainingSeconds(getStepSeconds(nextTimeline[0]));
     setRoundBreakSeconds(0);
+    setReplacementExerciseId(null);
+    setSelectedWorkoutExerciseId(null);
+  }
+
+  function startNewWorkout(nextWorkout: GeneratedWorkout) {
+    const nextTimeline = buildSessionTimeline(nextWorkout);
+
+    lastSpokenCountdownRef.current = "";
+    setWorkout(nextWorkout);
+    setTimeline(nextTimeline);
+    setStepIndex(0);
+    setRemainingSeconds(getStepSeconds(nextTimeline[0]));
+    setRoundBreakSeconds(0);
+    setSelectedWorkoutExerciseId(null);
+    setReplacementExerciseId(null);
+    setHasStartedSession(false);
     setIsRunning(false);
     setMode("session");
   }
@@ -562,15 +845,23 @@ export default function App() {
   }
 
   function handleResetSession() {
+    lastSpokenCountdownRef.current = "";
+    void setTorch(torchTrackRef.current, false);
     setStepIndex(0);
     setRemainingSeconds(getStepSeconds(timeline[0]));
     setRoundBreakSeconds(0);
+    setSelectedWorkoutExerciseId(null);
+    setReplacementExerciseId(null);
+    setHasStartedSession(false);
     setIsRunning(false);
     setMode("session");
   }
 
   function handleSkipStep() {
     const nextIndex = stepIndex + 1;
+
+    lastSpokenCountdownRef.current = "";
+    setReplacementExerciseId(null);
 
     if (nextIndex >= timeline.length) {
       setMode("complete");
@@ -586,6 +877,9 @@ export default function App() {
   function handleNextRound() {
     const nextIndex = stepIndex + 1;
 
+    lastSpokenCountdownRef.current = "";
+    setReplacementExerciseId(null);
+
     if (nextIndex >= timeline.length) {
       setMode("complete");
       setIsRunning(false);
@@ -599,6 +893,9 @@ export default function App() {
 
   function handleBackToSetup() {
     setIsRunning(false);
+    setHasStartedSession(false);
+    setReplacementExerciseId(null);
+    void setTorch(torchTrackRef.current, false);
     setHasEnteredGenerator(true);
     setMode("generator");
   }
@@ -695,7 +992,7 @@ export default function App() {
                 <div className="stepper" role="group" aria-label={t.exerciseCount}>
                   <button
                     className="stepper-button"
-                    onClick={() => adjustNumberSetting("exerciseCount", -1, 3, 8)}
+                    onClick={() => adjustNumberSetting("exerciseCount", -1, 3, 20)}
                     type="button"
                   >
                     -
@@ -706,7 +1003,7 @@ export default function App() {
                   </div>
                   <button
                     className="stepper-button"
-                    onClick={() => adjustNumberSetting("exerciseCount", 1, 3, 8)}
+                    onClick={() => adjustNumberSetting("exerciseCount", 1, 3, 20)}
                     type="button"
                   >
                     +
@@ -996,7 +1293,12 @@ export default function App() {
               <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
             </div>
 
-            <div className="timer-card">
+            <div
+              aria-label={`${currentStep.kind === "work" ? "Work" : currentStep.kind === "rest" ? "Rest" : "Round break"} timer`}
+              className="timer-card"
+              ref={timerCardRef}
+              tabIndex={-1}
+            >
               <p className="phase-label">
                 {currentStep.kind === "work"
                   ? "WORK"
@@ -1050,7 +1352,7 @@ export default function App() {
                   >
                     {currentRoundBreak.nextRound === settings.rounds ? t.lastRound : t.nextRound}
                   </button>
-                  <button className="secondary-button" onClick={() => setIsRunning((value) => !value)} type="button">
+                  <button className="secondary-button" onClick={toggleTimer} type="button">
                     {isRunning ? t.pauseClock : t.startPauseClock}
                   </button>
                 </>
@@ -1061,7 +1363,7 @@ export default function App() {
                   </button>
                   <button
                     className="primary-button large"
-                    onClick={() => setIsRunning((value) => !value)}
+                    onClick={toggleTimer}
                     type="button"
                   >
                     {isRunning ? "Pause" : "Start"}
@@ -1076,16 +1378,102 @@ export default function App() {
             <div className="exercise-strip">
               {workout.exercises.map((exercise, index) => {
                 const isCurrent = currentWorkStep?.exercise.id === exercise.id;
+                const isSelected = selectedWorkoutExerciseId === exercise.id;
+                const isReplacementTarget = replacementExerciseId === exercise.id;
 
                 return (
-                  <article key={exercise.id} className={`exercise-chip ${isCurrent ? "current" : ""}`}>
-                    <span>{index + 1}</span>
-                    <strong>{exercise.name}</strong>
-                    <small>{exercise.primaryFocus}</small>
-                  </article>
+                  <div className="exercise-chip-wrap" key={exercise.id}>
+                    <button
+                      aria-expanded={isSelected || isReplacementTarget}
+                      className={`exercise-chip ${isCurrent ? "current" : ""} ${isSelected ? "selected" : ""} ${
+                        isReplacementTarget ? "replacement-target" : ""
+                      }`}
+                      onClick={(event) => {
+                        if (didLongPressRef.current) {
+                          event.preventDefault();
+                          didLongPressRef.current = false;
+                          return;
+                        }
+
+                        if (canCustomizeWorkout) {
+                          setReplacementExerciseId(isReplacementTarget ? null : exercise.id);
+                          setSelectedWorkoutExerciseId(null);
+                        }
+                      }}
+                      onPointerCancel={clearExerciseLongPress}
+                      onPointerDown={() => startExerciseLongPress(exercise.id)}
+                      onPointerLeave={clearExerciseLongPress}
+                      onPointerUp={clearExerciseLongPress}
+                      type="button"
+                    >
+                      <span>{index + 1}</span>
+                      <strong>{exercise.name}</strong>
+                      <small>{canCustomizeWorkout ? t.swapExercise : exerciseFocusLabels[exercise.primaryFocus]}</small>
+                    </button>
+
+                    {canCustomizeWorkout && isReplacementTarget && (
+                      <div className="replacement-dropdown">
+                        <div className="replacement-dropdown-head">
+                          <span>{t.chooseReplacement}</span>
+                          <button
+                            aria-label={language === "de" ? "Austausch schließen" : "Close replacement picker"}
+                            onClick={() => setReplacementExerciseId(null)}
+                            type="button"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="replacement-dropdown-list">
+                          {replacementOptions.map((option) => (
+                            <button
+                              key={option.id}
+                              onClick={() => replaceWorkoutExercise(option)}
+                              type="button"
+                            >
+                              <strong>{option.name}</strong>
+                              <small>
+                                {exerciseFocusLabels[option.primaryFocus]} · {difficultyLabels[option.difficulty]}
+                              </small>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
+
+            {canCustomizeWorkout && <p className="customize-hint">{t.customizeWorkoutHint}</p>}
+
+            {selectedWorkoutExercise && (
+              <article className="exercise-detail-card">
+                <div className="exercise-detail-head">
+                  <div>
+                    <p className="section-kicker">{exerciseFocusLabels[selectedWorkoutExercise.primaryFocus]}</p>
+                    <h3>{selectedWorkoutExercise.name}</h3>
+                  </div>
+                  <button
+                    aria-label={language === "de" ? "Übungsdetails schließen" : "Close exercise details"}
+                    className="detail-close-button"
+                    onClick={() => setSelectedWorkoutExerciseId(null)}
+                    type="button"
+                  >
+                    ×
+                  </button>
+                </div>
+                <p>{getExerciseCue(language, selectedWorkoutExercise.id, selectedWorkoutExercise.cue)}</p>
+                <div className="exercise-detail-meta">
+                  <span>{difficultyLabels[selectedWorkoutExercise.difficulty]}</span>
+                  <span>{formatExerciseEquipment(selectedWorkoutExercise.equipment)}</span>
+                </div>
+                <ul>
+                  {getExerciseInstructions(selectedWorkoutExercise).map((instruction) => (
+                    <li key={instruction}>{instruction}</li>
+                  ))}
+                </ul>
+              </article>
+            )}
           </section>
         )}
 
