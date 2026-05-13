@@ -1558,35 +1558,47 @@ export default function App() {
 
             {canCustomizeWorkout && <p className="customize-hint">{t.customizeWorkoutHint}</p>}
 
-            {selectedWorkoutExercise && (
-              <article className="exercise-detail-card">
-                <div className="exercise-detail-head">
-                  <div>
-                    <p className="section-kicker">{exerciseFocusLabels[selectedWorkoutExercise.primaryFocus]}</p>
-                    <h3>{selectedWorkoutExercise.name}</h3>
-                  </div>
-                  <button
-                    aria-label={language === "de" ? "Übungsdetails schließen" : "Close exercise details"}
-                    className="detail-close-button"
-                    onClick={() => setSelectedWorkoutExerciseId(null)}
-                    type="button"
-                  >
-                    ×
-                  </button>
-                </div>
-                <p>{getExerciseCue(language, selectedWorkoutExercise.id, selectedWorkoutExercise.cue)}</p>
-                <div className="exercise-detail-meta">
-                  <span>{difficultyLabels[selectedWorkoutExercise.difficulty]}</span>
-                  <span>{formatExerciseEquipment(selectedWorkoutExercise.equipment)}</span>
-                </div>
-                <ul>
-                  {getExerciseInstructions(selectedWorkoutExercise).map((instruction) => (
-                    <li key={instruction}>{instruction}</li>
-                  ))}
-                </ul>
-              </article>
-            )}
           </section>
+        )}
+
+        {mode === "session" && selectedWorkoutExercise && (
+          <div
+            className="exercise-detail-overlay"
+            onClick={() => setSelectedWorkoutExerciseId(null)}
+            role="presentation"
+          >
+            <article
+              aria-modal="true"
+              className="exercise-detail-card floating"
+              onClick={(event) => event.stopPropagation()}
+              role="dialog"
+            >
+              <div className="exercise-detail-head">
+                <div>
+                  <p className="section-kicker">{exerciseFocusLabels[selectedWorkoutExercise.primaryFocus]}</p>
+                  <h3>{selectedWorkoutExercise.name}</h3>
+                </div>
+                <button
+                  aria-label={language === "de" ? "Übungsdetails schließen" : "Close exercise details"}
+                  className="detail-close-button"
+                  onClick={() => setSelectedWorkoutExerciseId(null)}
+                  type="button"
+                >
+                  ×
+                </button>
+              </div>
+              <p>{getExerciseCue(language, selectedWorkoutExercise.id, selectedWorkoutExercise.cue)}</p>
+              <div className="exercise-detail-meta">
+                <span>{difficultyLabels[selectedWorkoutExercise.difficulty]}</span>
+                <span>{formatExerciseEquipment(selectedWorkoutExercise.equipment)}</span>
+              </div>
+              <ul>
+                {getExerciseInstructions(selectedWorkoutExercise).map((instruction) => (
+                  <li key={instruction}>{instruction}</li>
+                ))}
+              </ul>
+            </article>
+          </div>
         )}
 
         {mode === "complete" && workout && (
