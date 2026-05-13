@@ -292,6 +292,16 @@ const countdownCues: Record<number, string> = {
   2: "Two",
   1: "One"
 };
+const countdownAudioFiles: Record<string, string> = {
+  Five: "/audio/countdown/five.wav",
+  Four: "/audio/countdown/four.wav",
+  Three: "/audio/countdown/three.wav",
+  Two: "/audio/countdown/two.wav",
+  One: "/audio/countdown/one.wav",
+  "Rest!": "/audio/countdown/rest.wav",
+  "Go!": "/audio/countdown/go.wav"
+};
+const activeCountdownUtterances = new Set<SpeechSynthesisUtterance>();
 
 function loadStoredSettings() {
   if (typeof window === "undefined") {
@@ -403,12 +413,11 @@ function getExerciseInstructions(exercise: Exercise) {
     .slice(0, 3);
 }
 
-function speakCountdownCue(cue: string) {
+function getPreferredEnglishVoice() {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-    return;
+    return undefined;
   }
 
-  const utterance = new SpeechSynthesisUtterance(cue);
   const voices = window.speechSynthesis.getVoices();
   const englishVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("en"));
   const preferredVoiceNames = [
@@ -435,8 +444,15 @@ function speakCountdownCue(cue: string) {
       )
       .find(Boolean) ?? englishVoices[0];
 
+  return englishVoice;
+}
+
+function buildCountdownUtterance(cue: string, volume = 1) {
+  const utterance = new SpeechSynthesisUtterance(cue);
+  const englishVoice = getPreferredEnglishVoice();
+
   utterance.lang = "en-US";
-  utterance.volume = 1;
+  utterance.volume = volume;
   utterance.rate = 0.72;
   utterance.pitch = 0.96;
 
@@ -445,6 +461,32 @@ function speakCountdownCue(cue: string) {
     utterance.lang = englishVoice.lang;
   }
 
+  utterance.onend = () => activeCountdownUtterances.delete(utterance);
+  utterance.onerror = () => activeCountdownUtterances.delete(utterance);
+
+  return utterance;
+}
+
+function speakCountdownCue(cue: string) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    return;
+  }
+
+  const utterance = buildCountdownUtterance(cue);
+
+  activeCountdownUtterances.add(utterance);
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+}
+
+function primeSpeechSynthesis() {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    return;
+  }
+
+  const utterance = buildCountdownUtterance("Ready", 0.01);
+
+  activeCountdownUtterances.add(utterance);
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
 }
@@ -497,6 +539,7 @@ export default function App() {
   const timerCardRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const didLongPressRef = useRef(false);
+  const countdownAudioRef = useRef<Partial<Record<string, HTMLAudioElement>>>({});
   const [hasEnteredGenerator, setHasEnteredGenerator] = useState(false);
   const [generatorTab, setGeneratorTab] = useState<GeneratorTab>("workout");
   const [exerciseFilter, setExerciseFilter] = useState<ExerciseFilter>("all");
@@ -631,7 +674,7 @@ export default function App() {
     }
 
     lastSpokenCountdownRef.current = spokenKey;
-    speakCountdownCue(cue);
+    playCountdownCue(cue);
     void blinkTorch(torchTrackRef.current, remainingSeconds === 0 ? 3 : 1);
   }, [currentStep?.kind, isRunning, mode, remainingSeconds, stepIndex]);
 
@@ -759,6 +802,7 @@ export default function App() {
 
   function toggleTimer() {
     if (!isRunning) {
+      primeCountdownAudio();
       void prepareTorch();
       setHasStartedSession(true);
       setReplacementExerciseId(null);
@@ -812,6 +856,74 @@ export default function App() {
     setRoundBreakSeconds(0);
     setReplacementExerciseId(null);
     setSelectedWorkoutExerciseId(null);
+  }
+
+  function getCountdownAudio(cue: string) {
+    if (typeof Audio === "undefined") {
+      return undefined;
+    }
+
+    const existingAudio = countdownAudioRef.current[cue];
+
+    if (existingAudio) {
+      return existingAudio;
+    }
+
+    const file = countdownAudioFiles[cue];
+
+    if (!file) {
+      return undefined;
+    }
+
+    const audio = new Audio(file);
+
+    audio.preload = "auto";
+    audio.volume = 1;
+    countdownAudioRef.current[cue] = audio;
+
+    return audio;
+  }
+
+  function primeCountdownAudio() {
+    Object.keys(countdownAudioFiles).forEach((cue) => {
+      getCountdownAudio(cue)?.load();
+    });
+
+    const unlockAudio = getCountdownAudio("Five");
+
+    if (!unlockAudio) {
+      primeSpeechSynthesis();
+      return;
+    }
+
+    unlockAudio.muted = true;
+    unlockAudio.currentTime = 0;
+    void unlockAudio
+      .play()
+      .then(() => {
+        unlockAudio.pause();
+        unlockAudio.currentTime = 0;
+        unlockAudio.muted = false;
+      })
+      .catch(() => {
+        unlockAudio.muted = false;
+        primeSpeechSynthesis();
+      });
+  }
+
+  function playCountdownCue(cue: string) {
+    const audio = getCountdownAudio(cue);
+
+    if (!audio) {
+      speakCountdownCue(cue);
+      return;
+    }
+
+    audio.pause();
+    audio.muted = false;
+    audio.volume = 1;
+    audio.currentTime = 0;
+    void audio.play().catch(() => speakCountdownCue(cue));
   }
 
   function startNewWorkout(nextWorkout: GeneratedWorkout) {
